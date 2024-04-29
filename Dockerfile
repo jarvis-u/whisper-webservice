@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY FFmpeg/ /FFmpeg-6.1.1
+RUN git clone https://github.com/FFmpeg/FFmpeg.git --depth 1 --branch n6.1.1 --single-branch /FFmpeg-6.1.1
 
 WORKDIR /FFmpeg-6.1.1
 
