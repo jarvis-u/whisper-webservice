@@ -1,14 +1,14 @@
-FROM centos:7 AS ffmpeg
+FROM debian:bookworm-slim AS ffmpeg
 
-RUN yum makecache && \
-    yum update -y && \
-    yum install -y \
-    epel-release \
-    gcc \
-    make \
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -qq update \
+    && apt-get -qq install --no-install-recommends \
+    build-essential \
+    git \
+    pkg-config \
     yasm \
     ca-certificates \
-    && yum clean all
+    && rm -rf /var/lib/apt/lists/*
 
 COPY FFmpeg/ /FFmpeg-6.1.1
 
@@ -38,7 +38,7 @@ RUN PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./
     make install && \
     hash -r
 
-FROM centos:7
+FROM python:3.10
 
 WORKDIR /app
 
@@ -46,12 +46,6 @@ COPY . /app
 COPY requirements.txt /app
 COPY --from=ffmpeg /FFmpeg-6.1.1 /FFmpeg-6.1.1
 COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
-
-RUN yum update -y && \
-    yum install -y \
-    python3 \
-    python3-pip \
-    && yum clean all
 
 RUN pip install --upgrade pip -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
 RUN pip install --no-cache-dir -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
