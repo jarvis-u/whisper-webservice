@@ -1,10 +1,9 @@
 FROM centos:7 AS ffmpeg
 
-RUN dnf makecache && \
+RUN yum makecache && \
     yum update -y && \
     yum install -y \
     epel-release \
-    git \
     gcc \
     make \
     yasm \
@@ -15,14 +14,14 @@ COPY FFmpeg/ /FFmpeg-6.1.1
 
 WORKDIR /FFmpeg-6.1.1
 
-RUN ./configure \
-      --prefix="/usr/local/ffmpeg_build" \
+RUN PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./configure \
+      --prefix="$HOME/ffmpeg_build" \
       --pkg-config-flags="--static" \
-      --extra-cflags="-I/usr/local/ffmpeg_build/include" \
-      --extra-ldflags="-L/usr/local/ffmpeg_build/lib" \
+      --extra-cflags="-I$HOME/ffmpeg_build/include" \
+      --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
       --extra-libs="-lpthread -lm" \
       --ld="g++" \
-      --bindir="/usr/local/bin" \
+      --bindir="$HOME/bin" \
       --disable-doc \
       --disable-htmlpages \
       --disable-podpages \
@@ -35,7 +34,7 @@ RUN ./configure \
       --enable-filter=copy \
       --enable-protocol=file \
       --enable-small && \
-    make -j$(nproc) && \
+    PATH="$HOME/bin:$PATH" make -j$(nproc) && \
     make install && \
     hash -r
 
@@ -43,10 +42,10 @@ FROM centos:7
 
 WORKDIR /app
 
-COPY app/ /app
+COPY . /app
 COPY requirements.txt /app
 COPY --from=ffmpeg /FFmpeg-6.1.1 /FFmpeg-6.1.1
-COPY --from=ffmpeg /usr/local/bin/ffmpeg /usr/local/bin/ffmpeg
+COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 
 RUN yum update -y && \
     yum install -y \
