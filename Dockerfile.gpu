@@ -10,7 +10,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY FFmpeg/ /FFmpeg-6.1.1
+RUN git clone https://github.com/FFmpeg/FFmpeg.git --depth 1 --branch n6.1.1 --single-branch /FFmpeg-6.1.1
 
 WORKDIR /FFmpeg-6.1.1
 
@@ -60,8 +60,7 @@ COPY . .
 COPY --from=ffmpeg /FFmpeg-6.1.1 /FFmpeg-6.1.1
 COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 
-RUN pip install --upgrade pip -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
-RUN pip install --no-cache-dir -r requirements.txt -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch
 
 EXPOSE 8080

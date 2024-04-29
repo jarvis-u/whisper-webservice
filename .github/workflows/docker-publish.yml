@@ -23,7 +23,7 @@ jobs:
       matrix:
         include:
           - docker_file: Dockerfile
-            platforms: linux/arm64,linux/amd64
+            platforms: linux/amd64
 
     steps:
     - name: Checkout
@@ -45,6 +45,5 @@ jobs:
     - name: Build and Publish the Docker image
       if: github.ref != 'refs/heads/debug'
       run: |
-        DOCKER_IMAGE_LATEST=$DOCKER_USER/$REPO_NAME:latest${{ matrix.tag_extension }}
-        DOCKER_IMAGE_VERSION=$DOCKER_USER/$REPO_NAME:$GITHUB_REF_NAME${{ matrix.tag_extension }}
-        docker buildx build . --no-cache --platform=${{ matrix.platforms }} -t "${DOCKER_IMAGE_LATEST}" -t "${DOCKER_IMAGE_VERSION}" -f ${{ matrix.docker_file }} --push
+        DOCKER_IMAGE_LATEST=$DOCKER_USER/$REPO_NAME:latest
+        docker buildx build . --no-cache --platform=${{ matrix.platforms }} -t "${DOCKER_IMAGE_LATEST}" -f ${{ matrix.docker_file }} --push
