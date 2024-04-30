@@ -61,7 +61,6 @@ COPY --from=ffmpeg /FFmpeg-6.1.1 /FFmpeg-6.1.1
 COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch
 
 EXPOSE 8080
 
