@@ -1,4 +1,5 @@
 import os
+import pathlib
 from io import StringIO
 from threading import Lock
 from typing import Union, BinaryIO
@@ -8,7 +9,6 @@ import whisper
 from faster_whisper import WhisperModel
 
 from .utils import ResultWriter, WriteTXT, WriteSRT, WriteVTT, WriteTSV, WriteJSON
-
 
 model_name = os.getenv("ASR_MODEL", "base")
 model_path = os.getenv("ASR_MODEL_PATH", os.path.join(os.path.expanduser("~"), ".cache", "whisper"))
@@ -29,12 +29,13 @@ model = WhisperModel(
 
 model_lock = Lock()
 
+
 def transcribe(
-        audio,
-        language: Union[str, None],
-        initial_prompt: Union[str, None],
-        vad_filter: Union[bool, None],
-        output,
+        audio=None,
+        language: Union[str, None]=None,
+        initial_prompt: Union[str, None]=None,
+        vad_filter: Union[bool, None]=None,
+        output="txt",
 ):
     options_dict = {"task": "transcribe"}
     if language:

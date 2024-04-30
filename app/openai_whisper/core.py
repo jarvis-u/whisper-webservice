@@ -2,6 +2,7 @@ import os
 from io import StringIO
 from threading import Lock
 from typing import BinaryIO, Union
+import pathlib
 
 import torch
 import whisper
@@ -18,11 +19,11 @@ model_lock = Lock()
 
 
 def transcribe(
-        audio,
-        language: Union[str, None],
-        initial_prompt: Union[str, None],
-        vad_filter: Union[bool, None],
-        output
+        audio=None,
+        language: Union[str, None]=None,
+        initial_prompt: Union[str, None]=None,
+        vad_filter: Union[bool, None]=None,
+        output="txt",
 ):
     options_dict = {"task": "transcribe"}
     options_dict["fp16"] = False

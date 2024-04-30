@@ -1,4 +1,3 @@
-import importlib.metadata
 import os
 
 import numpy as np
@@ -10,7 +9,8 @@ from typing import Union, Annotated, BinaryIO
 from fastapi import FastAPI, File, UploadFile, Query
 from fastapi.responses import StreamingResponse
 from whisper import tokenizer
-from urllib.parse import quote
+
+from app.logger import logger
 
 SAMPLE_RATE = 16000
 
@@ -27,7 +27,8 @@ app = FastAPI()
 
 @app.post("/translation")
 async def translation(
-        audio_file: UploadFile = File(...),
+        audio_file: Union[UploadFile, None] = File(None),
+        file_path: Union[str, None] = Query(default=None, description="音频文件路径"),
         encode: bool = Query(default=True, description="Encode audio first through ffmpeg"),
         language: Union[str, None] = Query(default="zh", enum=LANGUAGE_CODES),
         initial_prompt: Union[str, None] = Query(default="以下是普通话的句子。"),
@@ -37,13 +38,17 @@ async def translation(
         )] = False,
         output: Union[str, None] = Query(default="txt", enum=["txt", "vtt", "srt", "tsv", "json"])
 ):
-    result = transcribe(load_audio(audio_file.file, encode), language, initial_prompt, vad_filter, output)
+    audio = file_path if not audio_file else load_audio(audio_file.file, encode)
+    result = transcribe(audio=audio,
+                        language=language,
+                        initial_prompt=initial_prompt,
+                        vad_filter=vad_filter,
+                        output=output)
     return StreamingResponse(
         result,
         media_type="text/plain",
         headers={
             'Asr-Engine': ASR_ENGINE,
-            'Content-Disposition': f'attachment; filename="{quote(audio_file.filename)}.{output}"'
         }
     )
 
@@ -66,15 +71,17 @@ def load_audio(file: BinaryIO, encode=True, sr: int = SAMPLE_RATE):
     """
     if encode:
         try:
-            out, _ = (
+            out, err = (
                 ffmpeg.input("pipe:", threads=0)
                 .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
                 .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file.read())
             )
+            if err is not None:
+                logger.error(err)
         except ffmpeg.Error as e:
             raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
         except Exception as e:
-            raise f"error {e}"
+            raise f"Exception {e}"
     else:
         out = file.read()
 
