@@ -25,5 +25,5 @@ docker run -d -p 8080:8080 -e ASR_MODEL=base -v /path/to/localPath:/path/to/cont
 ```
 ## GPU
 ```shell
-docker run -d --gpus all -p 9000:9000 -e ASR_MODEL=base -v /path/to/localPath:/path/to/containerPath onerahmet/openai-whisper-asr-webservice:latest-gpu
+docker run -d --gpus all -p 9000:9000 -e ASR_MODEL=base -v /path/to/localPath:/path/to/containerPath onerahmet/openai-whisper-webservice:latest-gpu
 ```

@@ -38,7 +38,15 @@ RUN PATH="$HOME/bin:$PATH" PKG_CONFIG_PATH="$HOME/ffmpeg_build/lib/pkgconfig" ./
     make install && \
     hash -r
 
-FROM python:3.10
+FROM python:3.10-bookworm
+
+ENV POETRY_VENV=/app/.venv
+
+RUN python3 -m venv $POETRY_VENV \
+    && $POETRY_VENV/bin/pip install -U pip setuptools \
+    && $POETRY_VENV/bin/pip install poetry==1.6.1
+
+ENV PATH="${PATH}:${POETRY_VENV}/bin"
 
 WORKDIR /app
 
@@ -46,7 +54,8 @@ COPY . /app
 COPY --from=ffmpeg /FFmpeg-6.1.1 /FFmpeg-6.1.1
 COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN poetry config virtualenvs.in-project true
+RUN poetry install
 
 EXPOSE 8080
 
