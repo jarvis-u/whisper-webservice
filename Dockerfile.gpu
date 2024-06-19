@@ -75,6 +75,8 @@ COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 RUN poetry install
 RUN $POETRY_VENV/bin/pip install torch==1.13.1+cu117 -f https://download.pytorch.org/whl/torch
 
+ENV WORKERS = 1
+
 EXPOSE 8080
 
-CMD gunicorn --bind 0.0.0.0:8080 --workers 1 --timeout 0 app.webservice:app -k uvicorn.workers.UvicornWorker
+CMD gunicorn --bind 0.0.0.0:8080 --workers $WORKERS --timeout 0 app.webservice:app -k uvicorn.workers.UvicornWorker

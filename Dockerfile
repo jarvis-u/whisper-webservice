@@ -57,6 +57,8 @@ COPY --from=ffmpeg /root/bin/ffmpeg /usr/local/bin/ffmpeg
 RUN poetry config virtualenvs.in-project true
 RUN poetry install
 
+ENV WORKERS = 1
+
 EXPOSE 8080
 
-ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--timeout", "0", "app.webservice:app", "-k", "uvicorn.workers.UvicornWorker"]
+ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "$WORKERS", "--timeout", "0", "app.webservice:app", "-k", "uvicorn.workers.UvicornWorker"]
